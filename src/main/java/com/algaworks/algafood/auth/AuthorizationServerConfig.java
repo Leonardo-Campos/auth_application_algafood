@@ -32,6 +32,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .secret(passwordEncoder.encode("web123"))
                 .authorizedGrantTypes("password", "refresh_token")
                 .scopes("write", "read")
+                .accessTokenValiditySeconds(6 * 60 * 60)// 6 horas
+                .refreshTokenValiditySeconds(60 * 24 * 60 * 60) // 60 dias
 
                 .and()
                 .withClient("foodanalytics")
@@ -49,18 +51,20 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .and()
                 .withClient("checktoken")
                 .secret(passwordEncoder.encode("check123"));
-
     }
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+//		security.checkTokenAccess("isAuthenticated()");
         security.checkTokenAccess("permitAll()");
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints.authenticationManager(authenticationManager)
-                .userDetailsService(userDetailsService);
+        endpoints
+                .authenticationManager(authenticationManager)
+                .userDetailsService(userDetailsService)
+                .reuseRefreshTokens(false);
     }
 
 }
